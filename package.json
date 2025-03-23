@@ -1,18 +1,36 @@
 {
-    "name": "electron-yt-shorts-app",
+    "name": "youtube-shorts-desktop",
     "version": "1.0.0",
-    "description": "An Electron app that floats YouTube Shorts on top of the screen, with global hotkeys.",
+    "description": "An Electron app that plays YouTube Shorts in a floating window, with global hotkeys and auto theater mode.",
+    "author": "Weitsenyu",
     "main": "main.js",
     "scripts": {
-        "start": "electron ."
+      "start": "electron .",
+      "dist": "electron-builder"
     },
-    "author": "Tsenyu",
-    "license": "MIT",
-    "dependencies": {
-        "electron": "^25.0.0"
+    "build": {
+      "appId": "com.yourname.ytshorts",
+      "productName": "YouTube Shorts Desktop",
+      "win": {
+        "target": "nsis",
+        "icon": "icons/icon.ico"
+      },
+      "directories": {
+        "buildResources": "build",
+        "output": "dist"
+      },
+      "publish": [
+        {
+          "provider": "github",
+          "owner": "Weitsenyu",
+          "repo": "YouTube-Shorts-Desktop"
+        }
+      ]
     },
     "devDependencies": {
-        "electron-builder": "^25.1.8",
-        "electron-updater": "^6.3.9"
+      "electron": "^25.0.0",
+      "electron-builder": "^23.6.0",
+      "electron-updater": "^6.1.2"
     }
-}
+  }
+  
