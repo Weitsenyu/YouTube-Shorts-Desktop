@@ -28,7 +28,7 @@ It features global hotkeys, auto theater mode, and automatic high quality video 
 ## 特色
 - **全域快捷鍵：** 可用來控制播放、靜音、音量調整和視窗顯示。
 - **自動劇院模式及最高畫質：** 當切換 Shorts 與一般影片時，應用程式會自動啟用劇院模式並設定最高畫質。
-- **懸浮視窗：** 應用程式會一直顯示在最上層，方便你在工作時也能輕鬆觀看影片。
+- **懸浮視窗：** 應用程式會預設顯示在最上層，方便你在工作時也能輕鬆觀看影片。
 
 ## 安裝方式
 1. **下載安裝檔：** 前往我們的 [GitHub Releases](https://github.com/Weitsenyu/YouTube-Shorts-Desktop/releases) 頁面，下載最新版本的安裝檔（例如 `YouTube Shorts Desktop Setup 1.0.0.exe`）。
