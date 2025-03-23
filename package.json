@@ -5,32 +5,37 @@
     "author": "Weitsenyu",
     "main": "main.js",
     "scripts": {
-      "start": "electron .",
-      "dist": "electron-builder"
+        "start": "electron .",
+        "dist": "electron-builder"
     },
     "build": {
-      "appId": "com.yourname.ytshorts",
-      "productName": "YouTube Shorts Desktop",
-      "win": {
-        "target": "nsis",
-        "icon": "icons/icon.ico"
-      },
-      "directories": {
-        "buildResources": "build",
-        "output": "dist"
-      },
-      "publish": [
-        {
-          "provider": "github",
-          "owner": "Weitsenyu",
-          "repo": "YouTube-Shorts-Desktop"
-        }
-      ]
+        "appId": "com.Weitsenyu.ytshorts",
+        "productName": "YouTube Shorts Desktop",
+        "win": {
+            "target": "nsis",
+            "icon": "icons/icon.ico"
+        },
+        "nsis": {
+            "oneClick": false,
+            "allowToChangeInstallationDirectory": true
+        },
+        "directories": {
+            "buildResources": "build",
+            "output": "dist"
+        },
+        "publish": [
+            {
+                "provider": "github",
+                "owner": "Weitsenyu",
+                "repo": "YouTube-Shorts-Desktop"
+            }
+        ]
     },
     "devDependencies": {
-      "electron": "^25.0.0",
-      "electron-builder": "^23.6.0",
-      "electron-updater": "^6.1.2"
+        "electron": "^25.0.0",
+        "electron-builder": "^23.6.0"
+    },
+    "dependencies": {
+        "electron-updater": "^6.3.9"
     }
-  }
-  
+}
