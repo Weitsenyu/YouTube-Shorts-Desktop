@@ -1,0 +1,14 @@
+{
+  "hotkeys": {
+    "bossKey": "",
+    "disguiseToggle": "",
+    "pauseKey": "",
+    "muteKey": "",
+    "volUpKey": "",
+    "volDownKey": "",
+    "closeKey": ""
+  },
+  "autoPlay": true,
+  "alreadyConfigured": false,
+  "disguiseMode": false
+}

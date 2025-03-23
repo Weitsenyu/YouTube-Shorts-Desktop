@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>設定快捷鍵</title>
+  <style>
+    /* 使頁面無捲軸，預設容納所有設定項目 */
+    html, body {
+      margin: 0; 
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #1f1f1f, #2c2c2c);
+      color: #e0e0e0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      overflow: hidden;
+    }
+    .container {
+      width: 100%;
+      height: 100%;
+      box-sizing: border-box;
+      padding: 30px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    h2 {
+      color: #fff;
+      margin-bottom: 20px;
+    }
+    .setting-item {
+      background: #292929;
+      width: 600px;
+      padding: 15px 20px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+      display: flex;
+      align-items: center;
+    }
+    .setting-item label {
+      flex: 1;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+    }
+    .helpIcon {
+      width: 18px;
+      height: 18px;
+      background: #444;
+      border-radius: 50%;
+      text-align: center;
+      line-height: 18px;
+      color: #fff;
+      margin-left: 6px;
+      position: relative;
+      cursor: help;
+      font-size: 12px;
+    }
+    .helpIcon:hover::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      top: 24px;
+      left: -10px;
+      background: #333;
+      color: #fff;
+      padding: 6px 8px;
+      border-radius: 4px;
+      white-space: nowrap;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+      pointer-events: none;
+    }
+    .setting-item input[type="text"],
+    .setting-item select {
+      flex: 1.5;
+      padding: 8px;
+      border: none;
+      border-radius: 4px;
+      font-size: 14px;
+      background-color: #3a3a3a;
+      color: #e0e0e0;
+    }
+    #finish {
+      width: 600px;
+      padding: 10px;
+      background-color: #6200EE;
+      border: none;
+      border-radius: 4px;
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+    #finish:hover {
+      background-color: #7f39fb;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>快捷鍵設定</h2>
+
+    <div class="setting-item">
+      <label>Boss Key (隱藏/顯示視窗)
+        <div class="helpIcon" data-tooltip="用於緊急隱藏或顯示視窗。例如：Shift+Q">?</div>
+      </label>
+      <input id="bossKey" type="text" class="hotkey" placeholder="Shift+Q (建議)" readonly />
+    </div>
+
+    <div class="setting-item">
+      <label>Pause Key (切換暫停/播放)
+        <div class="helpIcon" data-tooltip="可在隱藏狀態下使用，切換影片暫停/播放。例如：Shift+P">?</div>
+      </label>
+      <input id="pauseKey" type="text" class="hotkey" placeholder="Shift+P (建議)" readonly />
+    </div>
+
+    <div class="setting-item">
+      <label>Mute Key (切換靜音/恢復)
+        <div class="helpIcon" data-tooltip="切換影片靜音狀態。例如：Shift+M">?</div>
+      </label>
+      <input id="muteKey" type="text" class="hotkey" placeholder="Shift+M (建議)" readonly />
+    </div>
+
+    <div class="setting-item">
+      <label>Volume Up Key (調高音量)
+        <div class="helpIcon" data-tooltip="調高影片音量並顯示音量百分比。例如：Shift+Up">?</div>
+      </label>
+      <input id="volUpKey" type="text" class="hotkey" placeholder="Shift+Up (建議)" readonly />
+    </div>
+
+    <div class="setting-item">
+      <label>Volume Down Key (調低音量)
+        <div class="helpIcon" data-tooltip="調低影片音量並顯示音量百分比。例如：Shift+Down">?</div>
+      </label>
+      <input id="volDownKey" type="text" class="hotkey" placeholder="Shift+Down (建議)" readonly />
+    </div>
+
+    <div class="setting-item">
+      <label>還原視窗時是否自動播放？
+        <div class="helpIcon" data-tooltip="隱藏後再顯示時是否自動恢復播放影片">?</div>
+      </label>
+      <select id="autoPlay">
+        <option value="true">是 (自動播放)</option>
+        <option value="false">否 (僅解除靜音)</option>
+      </select>
+    </div>
+
+    <div class="setting-item">
+      <label>Close Window (關閉視窗)
+        <div class="helpIcon" data-tooltip="直接關閉主視窗。例如：Alt+Q">?</div>
+      </label>
+      <input id="closeKey" type="text" class="hotkey" placeholder="Alt+Q (建議)" readonly />
+    </div>
+
+    <button id="finish">完成</button>
+  </div>
+
+  <script src="settingsWindow.js"></script>
+</body>
+</html>
