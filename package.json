@@ -1,6 +1,6 @@
 {
     "name": "youtube-shorts-desktop",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "An Electron app that plays YouTube Shorts in a floating window, with global hotkeys and auto theater mode.",
     "author": "Weitsenyu",
     "main": "main.js",
