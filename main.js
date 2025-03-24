@@ -9,8 +9,15 @@ let settings = null;
 let settingsWindow = null;
 let mainWindow = null;
 
+/*=======================
+  設定檔存取：改用 app.getPath('userData')
+========================*/
+function getSettingsPath() {
+  return path.join(app.getPath('userData'), 'settings.json');
+}
+
 function loadSettings() {
-  const filePath = path.join(__dirname, 'settings.json');
+  const filePath = getSettingsPath();
   if (!fs.existsSync(filePath)) {
     const defaultSettings = {
       hotkeys: {
@@ -33,10 +40,13 @@ function loadSettings() {
 }
 
 function saveSettings() {
-  const filePath = path.join(__dirname, 'settings.json');
+  const filePath = getSettingsPath();
   fs.writeFileSync(filePath, JSON.stringify(settings, null, 2));
 }
 
+/*=======================
+  視窗管理函式
+========================*/
 function closeMainWindow() {
   if (mainWindow) {
     mainWindow.close();
@@ -73,8 +83,7 @@ function createMainWindow() {
       frame: true,
       resizable: true,
       webPreferences: {
-        // 重要：原本你是 nodeIntegration: false, contextIsolation: false
-        // 若你之後還是想在網頁端用 require('electron')，就要設成 true
+        // 若要在網頁端用 require('electron')，需設定成 true
         nodeIntegration: false,
         contextIsolation: false,
         preload: path.join(__dirname, 'windows', 'mainWindow.js')
@@ -82,14 +91,14 @@ function createMainWindow() {
     });
     Menu.setApplicationMenu(null);
 
+    // 載入 YouTube Shorts 頁面
     mainWindow.loadURL('https://www.youtube.com/shorts');
 
-    // 改用主程序檢測 URL
+    // 當網頁載入完成或在頁面內導覽變更時，根據 URL 調整視窗大小
     mainWindow.webContents.on('did-finish-load', () => {
       const url = mainWindow.webContents.getURL();
       handleNavigation(url);
     });
-
     mainWindow.webContents.on('did-navigate-in-page', (event, url) => {
       handleNavigation(url);
     });
@@ -100,50 +109,50 @@ function createMainWindow() {
   }
 }
 
-// 用來根據 URL 判斷「短 / 長」影片，並做對應處理
+/*=======================
+  調整視窗大小
+  問題1：移除自動定位至右下角，只改變大小，不改變目前位置
+========================*/
+function setWindowSizeAndPosition(type) {
+  if (!mainWindow) return;
+  let w, h;
+  if (type === 'short') {
+    // 直向影片尺寸
+    w = 500;
+    h = 800;
+  } else {
+    // 橫向影片尺寸
+    w = 950;
+    h = 600;
+  }
+  // 僅調整視窗大小，不改變現有位置
+  mainWindow.setSize(w, h);
+}
+
+/*=======================
+  根據 URL 切換影片模式
+  問題2：橫版影片時不自動啟用劇院模式與最高畫質，避免干擾其他功能
+========================*/
 function handleNavigation(url) {
   if (!mainWindow) return;
 
   if (url.includes('/shorts/')) {
-    // 短影片
+    // 短影片：調整尺寸並自動切換劇院模式與最高畫質
     setWindowSizeAndPosition('short');
-    // 短影片也預設劇院 & 最高畫質
     setTimeout(() => {
       attemptTheaterMode(0);
       attemptMaxQuality(0);
     }, 1500);
   } else if (url.includes('/watch')) {
-    // 長影片
+    // 長影片（橫版）：僅調整尺寸，不呼叫自動劇院與畫質設定
     setWindowSizeAndPosition('long');
-    // 長影片預設劇院 & 最高畫質
-    setTimeout(() => {
-      attemptTheaterMode(0);
-      attemptMaxQuality(0);
-    }, 1500);
   }
 }
 
-// 根據 short/long 調整視窗大小、位置
-function setWindowSizeAndPosition(type) {
-  if (!mainWindow) return;
-  const { width: sw, height: sh } = screen.getPrimaryDisplay().workAreaSize;
-  const gap = 20;
-  let w, h;
-  if (type === 'short') {
-    // 短影片（直向）
-    w = 500;
-    h = 800;
-  } else {
-    // 長影片（橫向）可自行調整
-    w = 950;
-    h = 600;
-  }
-  const x = sw - w - gap;
-  const y = sh - h - gap;
-  mainWindow.setBounds({ x, y, width: w, height: h });
-}
-
-// 重複嘗試點擊「劇院模式」按鈕
+/*=======================
+  劇院模式與最高畫質
+  保留原有重複嘗試機制（只在直向影片中啟用）
+========================*/
 function attemptTheaterMode(attempt) {
   if (attempt > 1) return;
   mainWindow.webContents.executeJavaScript(`
@@ -151,9 +160,9 @@ function attemptTheaterMode(attempt) {
       const btn = document.querySelector('button.ytp-size-button');
       if(btn) {
         btn.click();
-        "OK"
+        return "OK";
       } else {
-        "NOT_FOUND"
+        return "NOT_FOUND";
       }
     })();
   `).then(result => {
@@ -167,16 +176,13 @@ function attemptTheaterMode(attempt) {
   });
 }
 
-// 重複嘗試設定「最高畫質」(假設為英文介面：Quality)
 function attemptMaxQuality(attempt) {
   if (attempt > 1) return;
   mainWindow.webContents.executeJavaScript(`
     (function(){
       const gear = document.querySelector('.ytp-settings-button');
       if(!gear) return "NO_GEAR";
-      gear.click(); // 打開設定選單
-
-      // 尋找 "Quality" 選單
+      gear.click();
       const menuItems = document.querySelectorAll('.ytp-menuitem-label');
       let qualityItem = null;
       menuItems.forEach(item => {
@@ -186,12 +192,8 @@ function attemptMaxQuality(attempt) {
       });
       if(!qualityItem) return "NO_QUALITY_MENU";
       qualityItem.click();
-
-      // 再找可用畫質(最頂的應該是最高畫質)
       const qualityOptions = document.querySelectorAll('.ytp-menuitem-label');
       if(!qualityOptions.length) return "NO_QUALITY_OPTION";
-
-      // 取第一個 (最高畫質)
       qualityOptions[0].click();
       return "OK";
     })();
@@ -206,10 +208,13 @@ function attemptMaxQuality(attempt) {
   });
 }
 
+/*=======================
+  全域快捷鍵註冊
+========================*/
 function registerHotkeys() {
   const { bossKey, pauseKey, muteKey, volUpKey, volDownKey, closeKey } = settings.hotkeys;
 
-  // Boss Key => 隱藏時暫停
+  // Boss Key：隱藏時暫停影片；恢復時根據 autoPlay 進行播放
   if (bossKey) {
     globalShortcut.register(bossKey, () => {
       if (!mainWindow) return;
@@ -220,13 +225,12 @@ function registerHotkeys() {
       } else {
         mainWindow.show();
         mainWindow.setSkipTaskbar(false);
-        // 還原後 => autoPlay
         mainWindow.webContents.send('resume-video', settings.autoPlay);
       }
     });
   }
 
-  // Pause Key => 可在隱藏狀態使用
+  // Pause Key：切換暫停/播放
   if (pauseKey) {
     globalShortcut.register(pauseKey, () => {
       if (mainWindow) {
@@ -235,7 +239,7 @@ function registerHotkeys() {
     });
   }
 
-  // Mute Key
+  // Mute Key：切換靜音（問題2：橫版影片中請確保此功能可用）
   if (muteKey) {
     globalShortcut.register(muteKey, () => {
       if (mainWindow) {
@@ -271,19 +275,20 @@ function registerHotkeys() {
     });
   }
 
-  // Ctrl+Shift+S => 重新設定
+  // Ctrl+Shift+S：重新開啟設定視窗
   globalShortcut.register('Ctrl+Shift+S', () => {
     console.log('Ctrl+Shift+S triggered => open settings window');
     createSettingsWindow();
   });
 }
 
-// IPC：取得設定
+/*=======================
+  IPC 處理：取得與儲存設定
+========================*/
 ipcMain.handle('get-current-settings', () => {
   return settings;
 });
 
-// IPC：儲存設定
 ipcMain.on('save-hotkeys', (event, data) => {
   settings.hotkeys.bossKey = data.bossKey;
   settings.hotkeys.pauseKey = data.pauseKey;
@@ -305,33 +310,48 @@ ipcMain.on('save-hotkeys', (event, data) => {
   registerHotkeys();
 });
 
-// ----------------------
-// app lifecycle
-// ----------------------
-app.whenReady().then(() => {
-  loadSettings();
-  if (!settings.alreadyConfigured) {
-    createSettingsWindow();
-  } else {
-    createMainWindow();
-    registerHotkeys();
-  }
-
-  // （若使用 electron-updater，可在這裡檢查更新）
-  autoUpdater.checkForUpdatesAndNotify();
-
-  app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) {
-      if (!settings.alreadyConfigured) {
-        createSettingsWindow();
-      } else {
-        createMainWindow();
-        registerHotkeys();
-      }
+/*=======================
+  單一執行個體處理
+========================*/
+const gotTheLock = app.requestSingleInstanceLock();
+if (!gotTheLock) {
+  app.quit();
+} else {
+  app.on('second-instance', () => {
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) mainWindow.restore();
+      mainWindow.focus();
     }
   });
-});
 
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') app.quit();
-});
+  /*=======================
+    App Lifecycle
+  ========================*/
+  app.whenReady().then(() => {
+    loadSettings();
+    if (!settings.alreadyConfigured) {
+      createSettingsWindow();
+    } else {
+      createMainWindow();
+      registerHotkeys();
+    }
+
+    // 檢查更新（若使用 electron-updater）
+    autoUpdater.checkForUpdatesAndNotify();
+
+    app.on('activate', () => {
+      if (BrowserWindow.getAllWindows().length === 0) {
+        if (!settings.alreadyConfigured) {
+          createSettingsWindow();
+        } else {
+          createMainWindow();
+          registerHotkeys();
+        }
+      }
+    });
+  });
+
+  app.on('window-all-closed', () => {
+    if (process.platform !== 'darwin') app.quit();
+  });
+}
