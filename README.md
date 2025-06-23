@@ -1,3 +1,7 @@
+## Demo Preview
+
+![Demo](assets/demo.gif)
+
 # YouTube Shorts Desktop
 
 An Electron-based desktop application that allows you to view YouTube Shorts and regular YouTube videos in a floating window.  
